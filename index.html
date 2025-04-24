@@ -63,5 +63,15 @@
       obtenerGPS();
     };
   </script>
+<cript>
+  navigator.geolocation.getCurrentPosition(
+  (position) => {
+    console.log("Ubicación:", position.coords);
+  },
+  (error) => {
+    console.warn("Permiso denegado o error:", error.message);
+  }
+);
+</script>
 </body>
 </html>
