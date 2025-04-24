@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Detector de Movimiento y Foto con GPS</title>
+  <title>Foto con GPS</title>
   <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
   <style>
     body {
@@ -49,7 +49,7 @@
 </head>
 <body>
   <div class="container">
-    <h2>Detector de Movimiento y Foto</h2>
+    <h2>Foto con GPS</h2>
     <video id="video" autoplay playsinline></video>
     <button id="btnTomarFoto">Tomar Foto</button>
     <canvas id="canvas1" width="500" height="400"></canvas>
@@ -74,37 +74,40 @@
         console.log('Error al acceder a la cámara: ', err);
       });
 
-    // Tomar foto y extraer GPS
+    // Función para obtener la ubicación del usuario
+    function obtenerGPS() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          gpsOutput.innerHTML = `<strong>Latitud:</strong> ${lat}<br><strong>Longitud:</strong> ${lon}`;
+          return { lat, lon };
+        }, function(error) {
+          gpsOutput.innerHTML = "Error al obtener la ubicación: " + error.message;
+          return null;
+        });
+      } else {
+        gpsOutput.innerHTML = "La geolocalización no está soportada por este navegador.";
+        return null;
+      }
+    }
+
+    // Tomar foto y agregar GPS
     btnTomarFoto.addEventListener('click', () => {
       // Capturar la imagen del video
       ctx1.drawImage(video, 0, 0, canvas1.width, canvas1.height);
       const imgData = canvas1.toDataURL('image/jpeg');
 
-      // Extraer GPS de la imagen (si tiene)
-      EXIF.getData(imgData, function() {
-        const lat = EXIF.getTag(this, "GPSLatitude");
-        const latRef = EXIF.getTag(this, "GPSLatitudeRef");
-        const lon = EXIF.getTag(this, "GPSLongitude");
-        const lonRef = EXIF.getTag(this, "GPSLongitudeRef");
+      // Obtener GPS
+      const gps = obtenerGPS();
 
-        if (lat && lon && latRef && lonRef) {
-          const latitude = convertDMSToDD(lat, latRef);
-          const longitude = convertDMSToDD(lon, lonRef);
-          gpsOutput.innerHTML = `<strong>Latitud:</strong> ${latitude}<br><strong>Longitud:</strong> ${longitude}`;
-        } else {
-          gpsOutput.innerHTML = "No se encontraron datos GPS en la foto.";
-        }
-      });
+      if (gps) {
+        // Aquí puedes guardar la foto y los datos GPS en una base de datos, archivo, etc.
+        console.log('Foto tomada con GPS:', gps);
+      } else {
+        console.log('No se pudo obtener la ubicación.');
+      }
     });
-
-    function convertDMSToDD(dms, ref) {
-      const degrees = dms[0];
-      const minutes = dms[1];
-      const seconds = dms[2];
-      let dd = degrees + minutes / 60 + seconds / 3600;
-      if (ref === "S" || ref === "W") dd = -dd;
-      return dd.toFixed(6);
-    }
   </script>
 </body>
 </html>
