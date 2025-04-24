@@ -2,8 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Foto con GPS</title>
-  <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+  <title>Ubicación del Usuario</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -22,92 +21,42 @@
       max-width: 600px;
       text-align: center;
     }
-    video {
-      width: 100%;
-      height: auto;
-      border-radius: 10px;
-    }
-    button {
-      background-color: #4CAF50;
-      color: white;
-      padding: 15px 32px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-      border: none;
-      margin-top: 20px;
-    }
-    canvas {
-      display: none;
+    h2 {
+      margin-bottom: 20px;
     }
     #gpsOutput {
+      font-size: 1.2em;
       margin-top: 20px;
-      font-size: 1.1em;
       color: #007700;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Foto con GPS</h2>
-    <video id="video" autoplay playsinline></video>
-    <button id="btnTomarFoto">Tomar Fotoooooooooo</button>
-    <canvas id="canvas1" width="500" height="400"></canvas>
-    <div id="mensaje">Haz clic en el botón para tomar una foto</div>
-    <div id="gpsOutput"></div>
+    <h2>Sección de Ubicación</h2>
+    <div id="gpsOutput">Cargando ubicación...</div>
   </div>
 
   <script>
-    const video = document.getElementById('video');
-    const btnTomarFoto = document.getElementById('btnTomarFoto');
-    const canvas1 = document.getElementById('canvas1');
-    const ctx1 = canvas1.getContext('2d');
-    const gpsOutput = document.getElementById('gpsOutput');
-    const mensaje = document.getElementById('mensaje');
-
-    // Acceder a la cámara
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => {
-        video.srcObject = stream;
-      })
-      .catch(err => {
-        console.log('Error al acceder a la cámara: ', err);
-      });
-
     // Función para obtener la ubicación del usuario
     function obtenerGPS() {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
           const lat = position.coords.latitude;
           const lon = position.coords.longitude;
-          gpsOutput.innerHTML = `<strong>Latitud:</strong> ${lat}<br><strong>Longitud:</strong> ${lon}`;
-          return { lat, lon };
+          document.getElementById('gpsOutput').innerHTML = `<strong>Latitud:</strong> ${lat} <br><strong>Longitud:</strong> ${lon}`;
         }, function(error) {
-          gpsOutput.innerHTML = "Error al obtener la ubicación: " + error.message;
-          return null;
+          document.getElementById('gpsOutput').innerHTML = "Error al obtener la ubicación: " + error.message;
         });
       } else {
-        gpsOutput.innerHTML = "La geolocalización no está soportada por este navegador.";
-        return null;
+        document.getElementById('gpsOutput').innerHTML = "La geolocalización no está soportada por este navegador.";
       }
     }
 
-    // Tomar foto y agregar GPS
-    btnTomarFoto.addEventListener('click', () => {
-      // Capturar la imagen del video
-      ctx1.drawImage(video, 0, 0, canvas1.width, canvas1.height);
-      const imgData = canvas1.toDataURL('image/jpeg');
-
-      // Obtener GPS
-      const gps = obtenerGPS();
-
-      if (gps) {
-        // Aquí puedes guardar la foto y los datos GPS en una base de datos, archivo, etc.
-        console.log('Foto tomada con GPS:', gps);
-      } else {
-        console.log('No se pudo obtener la ubicación.');
-      }
-    });
+    // Llamar a la función para obtener la ubicación al cargar la página
+    window.onload = function() {
+      obtenerGPS();
+    };
   </script>
 </body>
 </html>
